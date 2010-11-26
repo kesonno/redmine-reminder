@@ -1,0 +1,10 @@
+#setup your environment
+
+mkdir ~/bin
+mkdir ~/node-latest
+cd !$ 
+curl http://nodejs.org/dist/node-latest.tar.gz | tar xz --strip-components=1
+./configure --prefix=~
+make install
+curl http://npmjs.org/install.sh | sh
+npm install xml2js

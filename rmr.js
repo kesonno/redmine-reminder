@@ -18,8 +18,7 @@ var requestHeaders = {
 var reqIssues = redmine.request('GET', '/issues.xml?assigned_to_id=me&status_id=open', requestHeaders);
 
 // Template per generare la lista con Zenity
-// @todo identificare più precisamente l'eseguibile
-var issuesListTpl = 'zenity --list --width=600 --height=500 --title="Elenco delle issue che ti sono assegnate" --column="#" --column="Progetto" --column="Titolo" ';
+var issuesListTpl = '/usr/bin/zenity --list --width=600 --height=500 --title="Elenco delle issue che ti sono assegnate" --column="#" --column="Progetto" --column="Titolo" ';
 
 reqIssues.on('response', function(response) {
 	
@@ -41,9 +40,7 @@ reqIssues.on('response', function(response) {
       }
 
       // Mostra la lista
-      child = exec(issuesList, function(error, stdout, stderr) {
-        
-      });
+      child = exec(issuesList, function(error, stdout, stderr) {});
     }).parseString(body);
   });
 }).end();
