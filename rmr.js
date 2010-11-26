@@ -1,3 +1,6 @@
+// Credenziali di accesso a Redmine
+var cfg = require('./config');
+
 // Modulo utilizzato per lanciare l'eseguibile di Zenity
 var exec = require('child_process').exec;
 
@@ -11,7 +14,7 @@ var redmine = require('http').createClient(80, 'tracker.nextre.it');
 // Header per le richieste al tracker
 var requestHeaders = {
   'host': 'tracker.nextre.it',
-  'Authorization': 'Basic ' + new Buffer('gennaro.vietri:270583').toString('base64')
+  'Authorization': 'Basic ' + new Buffer(cfg.getConfig().user + ':' + cfg.getConfig().pass).toString('base64')
 };
 
 // Recupero tutte le issue aperte e assegnate all'utente
