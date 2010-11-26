@@ -1,4 +1,4 @@
-#setup your environment
+#steps to setup your environment
 
 mkdir ~/bin
 mkdir ~/node-latest
