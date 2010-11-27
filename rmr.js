@@ -18,7 +18,7 @@ var requestHeaders = {
 };
 
 // Recupero tutte le issue aperte e assegnate all'utente
-var reqIssues = redmine.request('GET', '/issues.xml?assigned_to_id=me&status_id=open', requestHeaders);
+var reqIssues = redmine.request('GET', '/issues.xml?assigned_to_id=me', requestHeaders);
 
 // Template per generare la lista con Zenity
 var issuesListTpl = '/usr/bin/zenity --list --width=600 --height=500 --title="Elenco delle issue che ti sono assegnate" --column="#" --column="Progetto" --column="Titolo" ';

@@ -4,6 +4,9 @@ mkdir ~/bin
 mkdir ~/node-latest
 cd !$ 
 curl http://nodejs.org/dist/node-latest.tar.gz | tar xz --strip-components=1
+
+#ssl dev libraries are required 
+sudo apt-get install libssl-dev
 ./configure --prefix=~
 make install
 curl http://npmjs.org/install.sh | sh
