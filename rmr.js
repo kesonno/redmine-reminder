@@ -1,4 +1,3 @@
-// Credenziali di accesso a Redmine
 var cfg = require('./config');
 
 // Modulo utilizzato per lanciare l'eseguibile di Zenity
@@ -9,12 +8,12 @@ var xml2js = require('xml2js');
 var parser = new xml2js.Parser();
 
 // Client per le richieste al server
-var redmine = require('http').createClient(80, 'tracker.nextre.it');
+var redmine = require('http').createClient(80, cfg.getConfig().host);
 
 // Header per le richieste al tracker
 var requestHeaders = {
-  'host': 'tracker.nextre.it',
-  'Authorization': 'Basic ' + new Buffer(cfg.getConfig().user + ':' + cfg.getConfig().pass).toString('base64')
+  'host': cfg.getConfig().host,
+  'Authorization': 'Basic ' + new Buffer(cfg.getConfig().redmineuser + ':' + cfg.getConfig().redminepass).toString('base64')
 };
 
 // Recupero tutte le issue aperte e assegnate all'utente
@@ -45,10 +44,14 @@ reqIssues.on('response', function(response) {
       child = exec(issuesList, function(error, stdout, stderr) {
     	  var issueId = stdout.replace("\n", "");
     	  exec('/usr/bin/zenity --question --text "Vuoi loggare un\'ora sul task '+issueId+'?"; echo $?', function(error, stdout, stderr){
-		      if(stdout.replace("\n", "")===0){
+              if(stdout.replace("\n", "")==0){
 		    	  //user pressed yes 
-		    	  exec('curl -v -H "Content-Type:text.json" -X PUT --data \'{"spent_time": "3.0"}\' -u cfg.getConfig().user:cfg.getConfig().pass http://tracker.nextre.it/issues/'+issueId+'.json', function(error, stdout, stderr){});
-		      }
+                  exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
+                  var projectId = stdout.replace("\n", "").replace("project_id", "");
+                  var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on,     tyear, tmonth, tweek, created_on, updated_on) VALUES('+projectId+', 22, '+issueId+', 1, \'generated from rmr script\', 9, \'2010-12-02\', 2010, 12, 48, \'2010-12-02\', \'2010-12-02\')"';
+                  exec(query, function(error, stdout, stderr){});
+                  });
+              }
     	  });
       });
     }).parseString(body);

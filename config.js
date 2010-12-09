@@ -1,8 +1,12 @@
 var config = {
-  host: 'tracker.nextre.it',
-  port: '80',
-  user: '',
-  pass: ''
+  host: '',
+  port: '',
+  redmineuser: '',
+  redminepass: '',
+  dbhost: '',
+  dbname: '',
+  dbuser: '',
+  dbpass: ''
 };
 
 exports.getConfig = function() {
