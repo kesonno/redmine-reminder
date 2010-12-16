@@ -6,6 +6,10 @@ var xml2js = require('xml2js');
 var parser = new xml2js.Parser();
 // to log something: require("sys").puts("error");
 
+Date.prototype.getWeek = function() {
+    var onejan = new Date(this.getFullYear(),0,1);
+    return Math.ceil((((this - onejan) / 86400000) + onejan.getDay()+1)/7);
+}
 
 var redmine = require('http').createClient(80, cfg.getConfig().host);
 var requestHeaders = {
@@ -30,15 +34,23 @@ reqIssues.on('response', function(response) {
 				//remove double quotes since are use by zenity
 				issuesList += issues[i].id + ' "' + issues[i].project['@'].name + '" "' + issues[i].subject.replace(/\"/g, "") + '" ';
 			}
-
 			//show the list
 			child = exec(issuesList, function(error, stdout, stderr) {
 				var issueId = stdout.replace("\n", "");
 				if(issueId===''){
 					return;
 				}
+
 				exec('/usr/bin/zenity --question --text "Vuoi loggare un\'ora sul task '+issueId+'?"; echo $?', function(error, stdout, stderr){
+
+                    var today = new Date();
+                    var curdate = today.getYear()+"-"+today.getMonth()+"-"+today.getDay();
+                    var year = today.getYear();
+                    var month = today.getMonth();
+                    var week = today.getWeek();                    
+
 					if(userChoice(stdout)==USER_PRESSED_NO){
+                        require("sys").puts("half an hour");
 						exec('/usr/bin/zenity --question --text "Vuoi loggare mezz\'ora sul task '+issueId+'?"; echo $?', function(error, stdout, stderr){
 							if(userChoice(stdout)==USER_PRESSED_NO){
 								return;
@@ -49,20 +61,23 @@ reqIssues.on('response', function(response) {
 								var projectId = stdout.replace("\n", "").replace("project_id", "");
 								var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 											' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-											'VALUES('+projectId+', 22, '+issueId+', 0.5, \'generated from rmr script\', 9, \'CURDATE()\', YEAR(), MONTH(), WEEK(), \'CURDATE()\', \'CURDATE()\')"';
-								exec(query, function(error, stdout, stderr){});
+											'VALUES('+projectId+', 22, '+issueId+', 0.5, \'generated from rmr script\', 9, '+curdate+', '+year+', '+month+', '+week+', '+curdate+', '+curdate+')"';
+								exec(query, function(error, stdout, stderr){
+                                    require("sys").puts(error);
+                                });
 							});
 						});
 					}
-					
-					if(userChoice==USER_PRESSED_YES){
+					if(userChoice(stdout)==USER_PRESSED_YES){
 						exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 									' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
 							var projectId = stdout.replace("\n", "").replace("project_id", "");
-							var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
+    						var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 										' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-										'VALUES('+projectId+', 22, '+issueId+', 1, \'generated from rmr script\', 9, \'CURDATE()\', YEAR(), MONTH(), WEEK(), \'CURDATE()\', \'CURDATE()\')"';
-							exec(query, function(error, stdout, stderr){});
+										'VALUES('+projectId+', 22, '+issueId+', 1, NULL,9, '+curdate+', '+year+', '+month+', '+week+', '+curdate+', '+curdate+')"';
+							exec(query, function(error, stdout, stderr){
+                                //require("sys").puts(error);    
+                            });
 						});
 					}
 				});
