@@ -1,6 +1,7 @@
 var config = {
   host: '',
   port: '',
+  redmineUserId: '',
   redmineuser: '',
   redminepass: '',
   dbhost: '',

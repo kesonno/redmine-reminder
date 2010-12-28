@@ -61,7 +61,7 @@ reqIssues.on('response', function(response) {
 								var projectId = stdout.replace("\n", "").replace("project_id", "");
 								var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 											' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-											'VALUES('+projectId+', 22, '+issueId+', 0.5, \'generated from rmr script\', 9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
+											'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 0.5, \'generated from rmr script\', 9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
 								exec(query, function(error, stdout, stderr){});
 							});
 						});
@@ -72,7 +72,7 @@ reqIssues.on('response', function(response) {
 							var projectId = stdout.replace("\n", "").replace("project_id", "");
     						var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 										' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-										'VALUES('+projectId+', 22, '+issueId+', 1, \'generated from rmr script\',9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
+										'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 1, \'generated from rmr script\',9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
                             exec(query, function(error, stdout, stderr){});
 						});
 					}
