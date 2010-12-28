@@ -1,3 +1,6 @@
+//Redmine Reminder
+//MIT License
+
 var USER_PRESSED_YES = 0;
 var USER_PRESSED_NO = 1;
 var cfg = require('./config');
