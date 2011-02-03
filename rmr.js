@@ -22,7 +22,7 @@ var requestHeaders = {
 
 //retrieve all user assigned open issues
 var reqIssues = redmine.request('GET', '/issues.xml?assigned_to_id=me', requestHeaders);
-var issuesListTemplate = '/usr/bin/zenity --list --width=600 --height=500 --title="Elenco delle issue che ti sono assegnate" --column="#" --column="Progetto" --column="Titolo" ';
+var issuesListTemplate = '/usr/bin/zenity --list --width=600 --height=500 --title="Your issues" --column="#" --column="Project" --column="Title" ';
 reqIssues.on('response', function(response) {
 	response.setEncoding('utf8');
 	var body = "";
@@ -44,7 +44,7 @@ reqIssues.on('response', function(response) {
 					return;
 				}
 
-				exec('/usr/bin/zenity --question --text "Vuoi loggare un\'ora sul task '+issueId+'?"; echo $?', function(error, stdout, stderr){
+				exec('/usr/bin/zenity --question --text "Do you want to log an hour on task #'+issueId+'?"; echo $?', function(error, stdout, stderr){
 
                     var today = new Date;
                     var monthDay = today.getDate().length==1 ? "0"+today.getDate() : today.getDate(); 
@@ -52,34 +52,43 @@ reqIssues.on('response', function(response) {
                     var month = today.getMonth()+1;
                     var week = today.getWeek();                    
                     var curdate = year+"-"+month+"-"+monthDay+" "+today.getHours()+":"+today.getMinutes()+":"+today.getSeconds();
-					
+					var description = "";
+
                     if(userChoice(stdout)==USER_PRESSED_NO){
-						exec('/usr/bin/zenity --question --text "Vuoi loggare mezz\'ora sul task '+issueId+'?"; echo $?', function(error, stdout, stderr){
+						exec('/usr/bin/zenity --question --text "Do you want to log half an hour on task #'+issueId+'?"; echo $?', function(error, stdout, stderr){
 							if(userChoice(stdout)==USER_PRESSED_NO){
 								return;
 							}
 							
-							exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
-									' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
-								var projectId = stdout.replace("\n", "").replace("project_id", "");
-								var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
-											' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-											'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 0.5, \'generated from rmr script\', 9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
-								exec(query, function(error, stdout, stderr){});
-							});
+							exec('zenity --entry --text "Insert your description" --entry-text "generated from rmr"; echo $?', function(error, stdout, stderr){
+								description = stdout;
+								exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
+										' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
+									var projectId = stdout.replace("\n", "").replace("project_id", "");
+									var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
+												' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
+												'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 0.5, \''+description+'\', 9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
+									exec(query, function(error, stdout, stderr){});
+								});
+						    });
+
 						});
 					}
 					if(userChoice(stdout)==USER_PRESSED_YES){
-						exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
-									' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
-							var projectId = stdout.replace("\n", "").replace("project_id", "");
-    						var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
-										' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
-										'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 1, \'generated from rmr script\',9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
-                            exec(query, function(error, stdout, stderr){});
-						});
+						exec('zenity --entry --text "Insert your description" --entry-text "generated from rmr"; echo $?', function(error, stdout, stderr){
+							description = stdout;
+							exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
+										' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
+								var projectId = stdout.replace("\n", "").replace("project_id", "");
+								var query = 'mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
+											' -e "INSERT INTO time_entries(project_id, user_id, issue_id, hours, comments, activity_id, spent_on, tyear, tmonth, tweek, created_on, updated_on) '+ 
+											'VALUES('+projectId+', '+cfg.getConfig().redmineUserId+', '+issueId+', 1, \''+description+'\',9, \''+curdate+'\', '+year+', '+month+', '+week+', \''+curdate+'\', \''+curdate+'\')"';
+								exec(query, function(error, stdout, stderr){});
+							});
+					    });
 					}
 				});
+
 			});
 		}).parseString(body);
     });
