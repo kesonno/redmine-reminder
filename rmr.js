@@ -61,7 +61,7 @@ reqIssues.on('response', function(response) {
 							}
 							
 							exec('zenity --entry --text "Insert your description" --entry-text "generated from rmr"; echo $?', function(error, stdout, stderr){
-								description = stdout;
+								description = stdout.replace("\n0", "");
 								exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 										' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
 									var projectId = stdout.replace("\n", "").replace("project_id", "");
@@ -76,7 +76,7 @@ reqIssues.on('response', function(response) {
 					}
 					if(userChoice(stdout)==USER_PRESSED_YES){
 						exec('zenity --entry --text "Insert your description" --entry-text "generated from rmr"; echo $?', function(error, stdout, stderr){
-							description = stdout;
+							description = stdout.replace("\n0", "");
 							exec('mysql -u'+cfg.getConfig().dbuser+' -p'+cfg.getConfig().dbpass+' -h '+cfg.getConfig().dbhost+' '+cfg.getConfig().dbname+
 										' -e "SELECT project_id FROM issues WHERE id = '+issueId+'"',function(error, stdout, stderr){
 								var projectId = stdout.replace("\n", "").replace("project_id", "");
