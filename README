@@ -1,0 +1,21 @@
+#Redmine Reminder
+#MIT License
+
+#How to learn not to use the latest technology for the first problem at hand (lesson learnt :)
+
+
+#setup your environment
+
+mkdir ~/bin
+#if ~/bin is not in your path you might want to add it now
+
+mkdir ~/node-latest
+cd !$ 
+curl http://nodejs.org/dist/node-latest.tar.gz | tar xz --strip-components=1
+
+#ssl dev libraries are required 
+sudo apt-get install libssl-dev
+./configure --prefix=~
+make install
+curl http://npmjs.org/install.sh | sh
+npm install xml2js
